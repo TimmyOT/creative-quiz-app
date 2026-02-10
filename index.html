@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Creative Quiz App</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(120deg,#020617,#0f172a);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.app {
+  background:#1e293b;
+  padding:25px;
+  width:420px;
+  border-radius:12px;
+  box-shadow:0 0 20px rgba(0,0,0,.6);
+  text-align:center;
+}
+input,button {
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:6px;
+  border:none;
+}
+button {background:#38bdf8;font-weight:bold;cursor:pointer;}
+.option {background:#334155;padding:10px;margin:6px 0;border-radius:6px;cursor:pointer;}
+.option:hover{background:#475569;}
+.progress{height:8px;background:#334155;border-radius:4px;overflow:hidden;margin:10px 0;}
+.bar{height:100%;width:0;background:#38bdf8;}
+.timer{color:#7dd3fc;font-size:14px;}
+</style>
+</head>
+
+<body>
+<div class="app" id="app"></div>
+
+<script>
+const quiz = [
+{q:"What does HTML stand for?",a:"HyperText Markup Language",o:["HyperText Markup Language","Home Tool Markup Language","Hyperlinks Text Markup","HighText Machine Language"]},
+{q:"What does CSS stand for?",a:"Cascading Style Sheets",o:["Creative Style Sheets","Cascading Style Sheets","Colorful Sheets","Computer Style Sheets"]},
+{q:"Which language runs in the browser?",a:"JavaScript",o:["Python","Java","C++","JavaScript"]},
+{q:"Correct JS variable declaration?",a:"let x = 5;",o:["int x=5","x:=5","let x = 5;","var: x=5"]},
+{q:"JS comment symbol?",a:"//",o:["<!-- -->","##","//","**"]},
+{q:"Which shows an alert box?",a:"alert()",o:["msg()","prompt()","alert()","print()"]},
+{q:"JavaScript was created by?",a:"Netscape",o:["Google","Microsoft","Netscape","IBM"]},
+{q:"Which tag links JS to HTML?",a:"<script>",o:["<js>","<script>","<javascript>","<code>"]},
+{q:"NaN means?",a:"Not a Number",o:["No Name","Not a Number","Not a Node","New Array"]},
+{q:"Equality operator?",a:"==",o:["=","==","===","!="]},
+
+{q:"Convert string to number?",a:"Number()",o:["String()","parse()","Number()","convert()"]},
+{q:"Which loop repeats code?",a:"for",o:["if","for","switch","break"]},
+{q:"Define a function?",a:"function",o:["method","class","function","define"]},
+{q:"Add item to array?",a:"push()",o:["pop()","push()","shift()","join()"]},
+{q:"Remove last array item?",a:"pop()",o:["push()","pop()","shift()","slice()"]},
+{q:"AND operator?",a:"&&",o:["||","&&","!","=="]},
+{q:"OR operator?",a:"||",o:["&&","||","==","!="]},
+{q:"Boolean value?",a:"true",o:["yes","1","true","ok"]},
+{q:"Print to console?",a:"console.log()",o:["print()","msg()","alert()","console.log()"]},
+{q:"Get element by ID?",a:"document.getElementById()",o:["getId()","query()","document.getElementById()","getClass()"]},
+
+{q:"Ends JS statement?",a:";",o:[".",",",":",";"]},
+{q:"Click event?",a:"onclick",o:["onpress","onload","onclick","onhover"]},
+{q:"Not a JS data type?",a:"float",o:["string","number","boolean","float"]},
+{q:"Strict equality operator?",a:"===",o:["=","==","===","!="]},
+{q:"Stops a loop?",a:"break",o:["end","stop","break","exit"]},
+{q:"Page load event?",a:"onload",o:["onready","onload","onstart","onclick"]},
+{q:"Array symbol?",a:"[]",o:["{}","[]","()","<>"]},
+{q:"Object symbol?",a:"{}",o:["()","[]","{}","<>"]},
+{q:"Holds many values?",a:"Array",o:["String","Number","Boolean","Array"]},
+{q:"JavaScript framework?",a:"React",o:["Django","Laravel","React","Flask"]},
+
+{q:"Run JS on server?",a:"Node.js",o:["Vue","React","Angular","Node.js"]},
+{q:"Handle errors with?",a:"try...catch",o:["error()","try...catch","handle()","debug()"]},
+{q:"Convert to string?",a:"toString()",o:["parse()","toString()","convert()","Stringify()"]},
+{q:"Correct IF syntax?",a:"if (x > y)",o:["if x > y","if (x > y)","if x > y then","if x : y"]},
+{q:"Update HTML text?",a:"innerHTML",o:["value","node","innerHTML","text"]},
+{q:"Modern JS version?",a:"ES6",o:["ES3","ES4","ES5","ES6"]},
+{q:"Create a Promise?",a:"new Promise()",o:["Promise()","makePromise()","new Promise()","async()"]},
+{q:"Wait in async?",a:"await",o:["wait","hold","await","delay"]},
+{q:"Make function async?",a:"async",o:["promise","then","async","await"]},
+{q:"Chain promises?",a:"then()",o:["after()","then()","next()","follow()"]},
+
+{q:"Remove first array item?",a:"shift()",o:["pop()","shift()","push()","slice()"]},
+{q:"Add item to beginning?",a:"unshift()",o:["push()","unshift()","shift()","pop()"]},
+{q:"Join array into string?",a:"join()",o:["split()","join()","concat()","merge()"]},
+{q:"Array length property?",a:"length",o:["size","count","length","total"]},
+{q:"NOT equal operator?",a:"!=",o:["==","===","!=","="]},
+
+{q:"Create a class using?",a:"class",o:["object","function","class","module"]},
+{q:"Extend a class using?",a:"extends",o:["inherits","extends","implements","super"]},
+{q:"Call parent constructor?",a:"super()",o:["this()","parent()","super()","base()"]},
+{q:"Declare constant?",a:"const",o:["let","var","const","static"]},
+{q:"Refer to current object?",a:"this",o:["self","object","this","me"]}
+];
+
+let index=0, score=0, time=15, timer, username="";
+const app=document.getElementById("app");
+
+function startScreen(){
+ app.innerHTML=`
+ <h2>🎯 Creative Quiz App</h2>
+ <p>Enter your name to begin</p>
+ <input id="nameInput" placeholder="Your name...">
+ <button onclick="startQuiz()">Start Quiz</button>`;
+}
+
+function startQuiz(){
+ username=document.getElementById("nameInput").value||"Player";
+ loadQuestion();
+}
+
+function loadQuestion(){
+ time=15;
+ clearInterval(timer);
+ timer=setInterval(()=>{
+  time--;
+  document.getElementById("timer").innerText="⏱ Time: "+time;
+  if(time<=0) nextQuestion();
+ },1000);
+
+ const q=quiz[index];
+ const progress=((index+1)/quiz.length)*100;
+
+ app.innerHTML=`
+ <div class="timer" id="timer">⏱ Time: 15</div>
+ <div class="progress"><div class="bar" style="width:${progress}%"></div></div>
+ <h3>Question ${index+1} of ${quiz.length}</h3>
+ <p>${q.q}</p>
+ ${q.o.map(opt=>`<div class="option" onclick="select('${opt}')">${opt}</div>`).join("")}
+ `;
+}
+
+function select(opt){
+ if(opt===quiz[index].a) score++;
+ nextQuestion();
+}
+
+function nextQuestion(){
+ index++;
+ clearInterval(timer);
+ if(index<quiz.length) loadQuestion();
+ else{
+  app.innerHTML=`
+  <h2>🎉 Quiz Completed!</h2>
+  <p>Well done, ${username}!</p>
+  <h3>Your Score: ${score} / ${quiz.length}</h3>
+  <button onclick="location.reload()">Play Again</button>`;
+ }
+}
+
+startScreen();
+</script>
+</body>
+</html>
